@@ -9,4 +9,3 @@ yum -y erase $PACKAGES
 getent passwd dbbackup >/dev/null || useradd dbbackup
 sudo -u dbbackup bakthat configure
 sudo -u dbbackup bakthat configure_backups_rotation
-EOF
