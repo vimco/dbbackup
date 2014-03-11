@@ -8,8 +8,8 @@ if [ $# -lt 2 ]; then
 fi
 BACKUP_DIR=$2
 
-FULL_DIR=$BACKUP_DIR/full
-INCR_DIR=$BACKUP_DIR/incremental
+FULL_DIR=$(readlink -f $BACKUP_DIR/full)
+INCR_DIR=$(readlink -f $BACKUP_DIR/incremental)
 
 # Prepare directories
 mkdir -p $FULL_DIR || (echo "Unable to write to $BACKUP_DIR" && exit)
@@ -39,15 +39,15 @@ test_complete_ok()
 }
 case $1 in
 full)
-    logfile=`date +%Y%M%d%H%m%s`-full_backup.log
+    logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-full_backup.log
     innobackupex --user=$BACKUP_USER $BACKUP_DIR | tee $logfile
     test_completed_ok $logfile
     find_last_full
     innobackupex --use-memory=1G --apply-log $LAST_FULL
     ;;
 incremental)
+    logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-incremental_backup.log
     find_last_full
-    logfile=`date +%Y%M%d%H%m%s`-incremental_backup.log
     innobackupex --user=$BACKUP_USER --incremental $INCR_DIR --incremental-basedir=$LAST_FULL --user=$BACKUP_USER | tee $logfile
     test_completed_ok $logfile
     ;;
