@@ -40,7 +40,7 @@ test_complete_ok()
 case $1 in
 full)
     logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-full_backup.log
-    innobackupex --user=$BACKUP_USER $BACKUP_DIR | tee $logfile
+    innobackupex --user=$BACKUP_USER $BACKUP_DIR 2>&1 | tee $logfile
     test_completed_ok $logfile
     find_last_full
     innobackupex --use-memory=1G --apply-log $LAST_FULL
@@ -48,7 +48,7 @@ full)
 incremental)
     logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-incremental_backup.log
     find_last_full
-    innobackupex --user=$BACKUP_USER --incremental $INCR_DIR --incremental-basedir=$LAST_FULL --user=$BACKUP_USER | tee $logfile
+    innobackupex --user=$BACKUP_USER --incremental $INCR_DIR --incremental-basedir=$LAST_FULL --user=$BACKUP_USER 2>&1 | tee $logfile
     test_completed_ok $logfile
     ;;
 esac
