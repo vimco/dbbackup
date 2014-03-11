@@ -6,8 +6,7 @@ yum install python-pip
 pip install bakthat argparse importlib
 yum -y erase $PACKAGES
 
-getent passwd dbbackups >/dev/null || useradd dbbackup
-su dbbackup <<EOF
-bakthat configure
-bakthat configure_backups_rotation
+getent passwd dbbackup >/dev/null || useradd dbbackup
+sudo -u dbbackup bakthat configure
+sudo -u dbbackup bakthat configure_backups_rotation
 EOF
