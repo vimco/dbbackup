@@ -12,7 +12,7 @@ FULL_DIR=$BACKUP_DIR/full
 INCR_DIR=$BACKUP_DIR/incremental
 
 # Prepare directories
-mkdir -p $FULL_DIR || echo "Unable to write to $BACKUP_DIR" && exit
+mkdir -p $FULL_DIR || (echo "Unable to write to $BACKUP_DIR" && exit)
 mkdir -p $INCR_DIR
 chown -R $BACKUP_USER $BACKUP_DIR
 chmod -R 770 $BACKUP_DIR
