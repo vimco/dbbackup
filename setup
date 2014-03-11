@@ -7,7 +7,7 @@ pip install bakthat
 yum -y erase $PACKAGES
 
 useradd dbbackup
-su - dbbackup
-
+su dbbackup <<EOF
 bakthat configure
 bakthat configure_backups_rotation
+EOF
