@@ -8,21 +8,11 @@ if [ $# -lt 2 ]; then
 fi
 BACKUP_DIR=$2
 
-if [ ! -d $BACKUP_DIR ]; then
-   echo "Path to backup dir must be a directory and exist!"
-   exit
-fi
-
-if [ ! -w $BACKUP_DIR -o -x $BACKUP_DIR ]; then
-    echo "Cannot write to $BACKUP_DIR.  Check permissions set for user $BACKUP_USER."
-    exit
-fi
-
 FULL_DIR=$BACKUP_DIR/full
 INCR_DIR=$BACKUP_DIR/incremental
 
 # Prepare directories
-mkdir -p $FULL_DIR
+mkdir -p $FULL_DIR || echo "Unable to write to $BACKUP_DIR" && exit
 mkdir -p $INCR_DIR
 chown -R $BACKUP_USER $BACKUP_DIR
 chmod -R 770 $BACKUP_DIR
