@@ -44,8 +44,10 @@ full)
     test_completed_ok $logfile
     find_last_full
     innobackupex --use-memory=1G --apply-log $LAST_FULL
-    tar c $FULL_DIR/$LAST_FULL/ | gzip -1 > $BACKUP_DIR/full.$LAST_FULL.tar.gz
-    bakthat backup --prompt=no $BACKUP_DIR/full.$LAST_FULL.tar.gz
+    OUTFILE=$BACKUP_DIR/full/full.$LAST_FULL.tar.gz
+    tar c $LAST_FULL | gzip -1 > $OUTFILE
+    bakthat backup --prompt=no $OUTFILE
+    rm $OUTFILE
     ;;
 incremental)
     logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-incremental_backup.log
