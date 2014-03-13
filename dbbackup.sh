@@ -59,7 +59,7 @@ full)
     OUTFILE=$BACKUP_DIR/full/full.$LAST_FULL.tar.gz
     tar c $LAST_FULL | gzip -1 > $OUTFILE
     bakthat backup --prompt=no $OUTFILE
-    rm $OUTFILE
+    rm -f $OUTFILE
     rotate_full
     ;;
 incremental)
