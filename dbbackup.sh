@@ -37,6 +37,18 @@ test_complete_ok()
       exit
     fi
 }
+
+rotate_full()
+{
+    find -maxdepth 1 -type d -ctime +14 $FULL_DIR -exec rm -rf {} \;
+}
+
+rotate_incr()
+{
+    find_last_full
+    find -maxdepth 1 -type d -older $LAST_FULL -exec rm -rf {} \;
+}
+
 case $1 in
 full)
     logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-full_backup.log
@@ -48,12 +60,14 @@ full)
     tar c $LAST_FULL | gzip -1 > $OUTFILE
     bakthat backup --prompt=no $OUTFILE
     rm $OUTFILE
+    rotate_full
     ;;
 incremental)
     logfile=$BACKUP_DIR/`date +%Y%M%d%H%m%s`-incremental_backup.log
     find_last_full
     innobackupex --user=$BACKUP_USER --incremental $INCR_DIR --incremental-basedir=$LAST_FULL --user=$BACKUP_USER 2>&1 | tee $logfile
     test_completed_ok $logfile
+    rotate_incr
     ;;
 esac
 
