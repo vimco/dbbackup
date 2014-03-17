@@ -27,5 +27,5 @@ fi
 cp -a dbbackup.sh /usr/local/bin/
 cp -a dbrestore.sh /usr/local/bin/
 
-mkdir -f $HOME/.bakthat_plugins
+mkdir -p $HOME/.bakthat_plugins
 cp -a mp_s3_backend.py $HOME/.bakthat_plugins/
