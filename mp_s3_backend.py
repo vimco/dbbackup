@@ -12,7 +12,6 @@ from multiprocessing.pool import IMapIterator
 from optparse import OptionParser
 import rfc822
 
-
 class MP_S3Backend(S3Backend):
   def upload(self, s3_keyname, transfer_file, **kwargs):
     self.log.info("Beginning monkey-patched upload!")
@@ -119,6 +118,5 @@ class MP_S3Backend(S3Backend):
 
 class S3Swapper(Plugin):
   def activate(self):
-    global S3Backend
-    self.log.info('Replacing S3Backend with MP_S3Backend')
-    S3Backend = MP_S3Backend
+    global STORAGE_BACKEND
+    STORAGE_BACKEND = dict(s3=MP_S3Backend)
