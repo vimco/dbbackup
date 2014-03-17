@@ -15,6 +15,7 @@ import rfc822
 
 class MP_S3Backend(S3Backend):
   def upload(self, s3_keyname, transfer_file, **kwargs):
+    self.log.info("Beginning monkey-patched upload!")
     use_rr = kwargs.get("s3_reduced_redundancy", False)
     cores = 4
 
