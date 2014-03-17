@@ -14,7 +14,7 @@ import boto
 from multiprocessing.pool import IMapIterator
 import rfc822
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('bakthat')
 
 def map_wrap(f):
   @functools.wraps(f)
