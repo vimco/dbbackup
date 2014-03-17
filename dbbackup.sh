@@ -53,10 +53,10 @@ case $1 in
 full)
     logfile=$BACKUP_DIR/`date +%Y%m%d%H%M%s`-full_backup.log
     innobackupex --user=$BACKUP_USER $FULL_DIR 2>&1 | tee $logfile
-    test_completed_ok $logfile
+    test_complete_ok $logfile
     find_last_full
     innobackupex --use-memory=1G --apply-log $LAST_FULL
-    OUTFILE=$BACKUP_DIR/full/full.$LAST_FULL.tar.gz
+    OUTFILE=$BACKUP_DIR/full/full.`basename $LAST_FULL`.tar.gz
     tar c $LAST_FULL | gzip -1 > $OUTFILE
     bakthat backup --prompt=no $OUTFILE
     rm -f $OUTFILE
@@ -66,7 +66,7 @@ incremental)
     logfile=$BACKUP_DIR/`date +%Y%m%d%H%M%s`-incremental_backup.log
     find_last_full
     innobackupex --user=$BACKUP_USER --incremental $INCR_DIR --incremental-basedir=$LAST_FULL --user=$BACKUP_USER 2>&1 | tee $logfile
-    test_completed_ok $logfile
+    test_complete_ok $logfile
     rotate_incr
     ;;
 esac
