@@ -38,17 +38,17 @@ class MP_S3Backend(S3Backend):
     else:
       self._multipart_upload(self.bucket, s3_keyname, transfer_file, mb_size, use_rr, cores)
 
-  def upload_cb(complete, total):
+  def upload_cb(self, complete, total):
     sys.stdout.write(".")
     sys.stdout.flush()
 
-  def _standard_transfer(bucket, s3_key_name, transfer_file, use_rr):
+  def _standard_transfer(self, bucket, s3_key_name, transfer_file, use_rr):
     log.info("Upload with standard transfer, not multipart")
     new_s3_item = bucket.new_key(s3_key_name)
     new_s3_item.set_contents_from_filename(transfer_file, reduced_redundancy=use_rr,
                                            cb=self.upload_cb, num_cb=10)
 
-  def mp_from_ids(mp_id, mp_keyname, mp_bucketname):
+  def mp_from_ids(self, mp_id, mp_keyname, mp_bucketname):
     """Get the multipart upload from the bucket and multipart IDs.
 
     This allows us to reconstitute a connection to the upload
@@ -61,7 +61,7 @@ class MP_S3Backend(S3Backend):
     return mp
 
   @map_wrap
-  def transfer_part(mp_id, mp_keyname, mp_bucketname, i, part):
+  def transfer_part(self, mp_id, mp_keyname, mp_bucketname, i, part):
     """Transfer a part of a multipart upload. Designed to be run in parallel.
     """
     mp = self.mp_from_ids(mp_id, mp_keyname, mp_bucketname)
@@ -70,7 +70,7 @@ class MP_S3Backend(S3Backend):
       mp.upload_part_from_file(t_handle, i+1)
     os.remove(part)
 
-  def _multipart_upload(bucket, s3_key_name, tarball, mb_size, use_rr=True, cores=None):
+  def _multipart_upload(self, bucket, s3_key_name, tarball, mb_size, use_rr=True, cores=None):
     """Upload large files using Amazon's multipart upload functionality.
     """
     log.info("Upload with multipart transfer")
@@ -85,15 +85,15 @@ class MP_S3Backend(S3Backend):
       return sorted(glob.glob("%s*" % prefix))
 
     mp = bucket.initiate_multipart_upload(s3_key_name, reduced_redundancy=use_rr)
-    with multimap(cores) as pmap:
-        for _ in pmap(transfer_part, ((mp.id, mp.key_name, mp.bucket_name, i, part)
-                                      for (i, part) in
-                                      enumerate(split_file(tarball, mb_size, cores)))):
+    with self.multimap(cores) as pmap:
+        for _ in pmap(self.transfer_part, ((mp.id, mp.key_name, mp.bucket_name, i, part)
+                                          for (i, part) in
+                                          enumerate(split_file(tarball, mb_size, cores)))):
             pass
     mp.complete_upload()
 
   @contextlib.contextmanager
-  def multimap(cores=None):
+  def multimap(self, cores=None):
     """Provide multiprocessing imap like function.
 
     The context manager handles setting up the pool, worked around interrupt issues
