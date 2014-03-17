@@ -41,11 +41,10 @@ class MP_S3Backend(S3Backend):
       sys.stdout.flush()
 
   def _standard_transfer(bucket, s3_key_name, transfer_file, use_rr):
-      print " Upload with standard transfer, not multipart",
+      self.log.info("Upload with standard transfer, not multipart")
       new_s3_item = bucket.new_key(s3_key_name)
       new_s3_item.set_contents_from_filename(transfer_file, reduced_redundancy=use_rr,
                                              cb=upload_cb, num_cb=10)
-      print
 
   def map_wrap(f):
       @functools.wraps(f)
@@ -71,7 +70,7 @@ class MP_S3Backend(S3Backend):
       """Transfer a part of a multipart upload. Designed to be run in parallel.
       """
       mp = mp_from_ids(mp_id, mp_keyname, mp_bucketname)
-      print " Transferring", i, part
+      self.log.info("Transferring", i, part)
       with open(part) as t_handle:
           mp.upload_part_from_file(t_handle, i+1)
       os.remove(part)
@@ -80,6 +79,7 @@ class MP_S3Backend(S3Backend):
                         cores=None):
       """Upload large files using Amazon's multipart upload functionality.
       """
+      self.log.info("Upload with multipart transfer")
       def split_file(in_file, mb_size, split_num=5):
           prefix = os.path.join(os.path.dirname(in_file),
                                 "%sS3PART" % (os.path.basename(s3_key_name)))
