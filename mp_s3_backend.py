@@ -77,10 +77,11 @@ class MP_S3Backend(S3Backend):
     def split_file(in_file, mb_size, split_num=5):
       prefix = os.path.join(os.path.dirname(in_file),
                             "%sS3PART" % (os.path.basename(s3_key_name)))
-      # require a split size between 5Mb (AWS minimum) and 250Mb
-      split_size = int(max(min(mb_size / (split_num * 2.0), 250), 5))
+      # require a split size between 5Mb (AWS minimum) and 500mb
+      split_size = int(max(min(mb_size / (split_num * 2.0), 500), 5))
       if not os.path.exists("%saa" % prefix):
           cl = ["split", "-b%sm" % split_size, in_file, prefix]
+          log.info("Splitting file")
           subprocess.check_call(cl)
       return sorted(glob.glob("%s*" % prefix))
 
