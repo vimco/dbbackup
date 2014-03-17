@@ -1,5 +1,5 @@
 from bakthat.plugin import Plugin
-from bakthat.backends import S3Backend
+import bakthat.backends
 
 import os
 import sys
