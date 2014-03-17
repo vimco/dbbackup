@@ -29,7 +29,7 @@ find_last_full()
 
 test_complete_ok()
 {
-    logfile=shift
+    logfile=$1
     ok=`grep 'completed OK!' $logfile`
     if [ "$ok" = "" ]
       then
