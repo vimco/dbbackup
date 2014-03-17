@@ -7,11 +7,11 @@ class MP_S3Backend(S3Backend)
     upload_kwargs = {"reduced_redundancy": kwargs.get("s3_reduced_redundancy", False)}
     if kwargs.get("cb", True):
       upload_kwargs = dict(cb=self.cb, num_cb=10)
-    mp = self.bucket.initiate_multipart_upload(filename, **upload_kwargs)
+    mp = self.bucket.initiate_multipart_upload(keyname, **upload_kwargs)
     with multimap(cores) as pmap:
       for _ in pmap(transfer_part, ((mp.id, mp.key_name, mp.bucket_name, i, part)
                                     for (i, part) in
-                                    enumerate(split_file(tarball, mb_size, cores)))):
+                                    enumerate(split_file(filename, mb_size, cores)))):
           pass
     mp.complete_upload()
 
