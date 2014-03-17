@@ -1,6 +1,6 @@
 import bakthat
 from bakthat.plugin import Plugin
-from bakthat.backends import S3Backend
+import bakthat.backends
 
 import os
 import sys
@@ -12,7 +12,6 @@ import multiprocessing
 import logging
 import boto
 from multiprocessing.pool import IMapIterator
-from optparse import OptionParser
 import rfc822
 
 
@@ -22,14 +21,13 @@ def map_wrap(f):
     return apply(f, *args, **kwargs)
   return wrapper
 
-class MP_S3Backend(S3Backend):
+class MP_S3Backend(boto.backend.S3Backend):
   def __init__(self, conf={}, profile="default"):
-    super(MP_S3Backend, self).__init__(conf, profile)
-    #self.log = logging.getLogger("bakthat")
+    S3Backend.__init__(self, conf, profile)
     self.conn = boto.connect_s3(self.conf["access_key"], self.conf["secret_key"])
 
   def upload(self, s3_keyname, transfer_file, **kwargs):
-    self.log.info("Beginning monkey-patched upload!")
+    log.info("Beginning monkey-patched upload!")
     use_rr = kwargs.get("s3_reduced_redundancy", False)
     cores = 4
 
@@ -44,7 +42,7 @@ class MP_S3Backend(S3Backend):
     sys.stdout.flush()
 
   def _standard_transfer(bucket, s3_key_name, transfer_file, use_rr):
-    self.log.info("Upload with standard transfer, not multipart")
+    log.info("Upload with standard transfer, not multipart")
     new_s3_item = bucket.new_key(s3_key_name)
     new_s3_item.set_contents_from_filename(transfer_file, reduced_redundancy=use_rr,
                                            cb=self.upload_cb, num_cb=10)
@@ -66,7 +64,7 @@ class MP_S3Backend(S3Backend):
     """Transfer a part of a multipart upload. Designed to be run in parallel.
     """
     mp = self.mp_from_ids(mp_id, mp_keyname, mp_bucketname)
-    self.log.info("Transferring", i, part)
+    log.info("Transferring", i, part)
     with open(part) as t_handle:
       mp.upload_part_from_file(t_handle, i+1)
     os.remove(part)
@@ -74,7 +72,7 @@ class MP_S3Backend(S3Backend):
   def _multipart_upload(bucket, s3_key_name, tarball, mb_size, use_rr=True, cores=None):
     """Upload large files using Amazon's multipart upload functionality.
     """
-    self.log.info("Upload with multipart transfer")
+    log.info("Upload with multipart transfer")
     def split_file(in_file, mb_size, split_num=5):
       prefix = os.path.join(os.path.dirname(in_file),
                             "%sS3PART" % (os.path.basename(s3_key_name)))
@@ -114,4 +112,4 @@ class MP_S3Backend(S3Backend):
 class S3Swapper(Plugin):
   def activate(self):
     bakthat.STORAGE_BACKEND = dict(s3=MP_S3Backend)
-    self.log.info('Replaced S3Backend with MP_S3Backend')
+    log.info('Replaced S3Backend with MP_S3Backend')
