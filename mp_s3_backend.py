@@ -24,9 +24,9 @@ def map_wrap(f):
 
 class MP_S3Backend(S3Backend):
   def __init__(self, conf={}, profile="default"):
-    self.log = logging.getLogger("bakthat")
-    self.conn = boto.connect_s3(self.conf["access_key"], self.conf["secret_key"])
     super(MP_S3Backend, self).__init__(conf, profile)
+    #self.log = logging.getLogger("bakthat")
+    self.conn = boto.connect_s3(self.conf["access_key"], self.conf["secret_key"])
 
   def upload(self, s3_keyname, transfer_file, **kwargs):
     self.log.info("Beginning monkey-patched upload!")
