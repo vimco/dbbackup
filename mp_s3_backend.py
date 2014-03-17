@@ -22,10 +22,51 @@ def map_wrap(f):
     return apply(f, *args, **kwargs)
   return wrapper
 
+def mp_from_ids(mp_id, mp_keyname, mp_bucketname):
+  """Get the multipart upload from the bucket and multipart IDs.
+
+  This allows us to reconstitute a connection to the upload
+  from within multiprocessing functions.
+  """
+  bucket = conn.lookup(mp_bucketname)
+  mp = boto.s3.multipart.MultiPartUpload(bucket)
+  mp.key_name = mp_keyname
+  mp.id = mp_id
+  return mp
+
+@map_wrap
+def transfer_part(mp_id, mp_keyname, mp_bucketname, i, part):
+  """Transfer a part of a multipart upload. Designed to be run in parallel.
+  """
+  mp = mp_from_ids(mp_id, mp_keyname, mp_bucketname)
+  log.info("Transferring", i, part)
+  with open(part) as t_handle:
+    mp.upload_part_from_file(t_handle, i+1)
+  os.remove(part)
+
+@contextlib.contextmanager
+def multimap(cores=None):
+  """Provide multiprocessing imap like function.
+
+  The context manager handles setting up the pool, worked around interrupt issues
+  and terminating the pool on completion.
+  """
+  if cores is None:
+    cores = max(multiprocessing.cpu_count() - 1, 1)
+  def wrapper(func):
+    def wrap(self, timeout=None):
+      return func(self, timeout=timeout if timeout is not None else 1e100)
+    return wrap
+  IMapIterator.next = wrapper(IMapIterator.next)
+  pool = multiprocessing.Pool(cores)
+  yield pool.imap
+  pool.terminate()
+
 class MP_S3Backend(S3Backend):
   def __init__(self, conf={}, profile="default"):
+    global conn
     S3Backend.__init__(self, conf, profile)
-    self.conn = boto.connect_s3(self.conf["access_key"], self.conf["secret_key"])
+    conn = boto.connect_s3(self.conf["access_key"], self.conf["secret_key"])
 
   def upload(self, s3_keyname, transfer_file, **kwargs):
     log.info("Beginning monkey-patched upload!")
@@ -48,28 +89,6 @@ class MP_S3Backend(S3Backend):
     new_s3_item.set_contents_from_filename(transfer_file, reduced_redundancy=use_rr,
                                            cb=self.upload_cb, num_cb=10)
 
-  def mp_from_ids(self, mp_id, mp_keyname, mp_bucketname):
-    """Get the multipart upload from the bucket and multipart IDs.
-
-    This allows us to reconstitute a connection to the upload
-    from within multiprocessing functions.
-    """
-    bucket = self.conn.lookup(mp_bucketname)
-    mp = boto.s3.multipart.MultiPartUpload(bucket)
-    mp.key_name = mp_keyname
-    mp.id = mp_id
-    return mp
-
-  @map_wrap
-  def transfer_part(self, mp_id, mp_keyname, mp_bucketname, i, part):
-    """Transfer a part of a multipart upload. Designed to be run in parallel.
-    """
-    mp = self.mp_from_ids(mp_id, mp_keyname, mp_bucketname)
-    log.info("Transferring", i, part)
-    with open(part) as t_handle:
-      mp.upload_part_from_file(t_handle, i+1)
-    os.remove(part)
-
   def _multipart_upload(self, bucket, s3_key_name, tarball, mb_size, use_rr=True, cores=None):
     """Upload large files using Amazon's multipart upload functionality.
     """
@@ -86,30 +105,12 @@ class MP_S3Backend(S3Backend):
       return sorted(glob.glob("%s*" % prefix))
 
     mp = bucket.initiate_multipart_upload(s3_key_name, reduced_redundancy=use_rr)
-    with self.multimap(cores) as pmap:
-        for _ in pmap(self.transfer_part, ((mp.id, mp.key_name, mp.bucket_name, i, part)
+    with multimap(cores) as pmap:
+        for _ in pmap(transfer_part, ((mp.id, mp.key_name, mp.bucket_name, i, part)
                                           for (i, part) in
                                           enumerate(split_file(tarball, mb_size, cores)))):
             pass
     mp.complete_upload()
-
-  @contextlib.contextmanager
-  def multimap(self, cores=None):
-    """Provide multiprocessing imap like function.
-
-    The context manager handles setting up the pool, worked around interrupt issues
-    and terminating the pool on completion.
-    """
-    if cores is None:
-      cores = max(multiprocessing.cpu_count() - 1, 1)
-    def wrapper(func):
-      def wrap(self, timeout=None):
-        return func(self, timeout=timeout if timeout is not None else 1e100)
-      return wrap
-    IMapIterator.next = wrapper(IMapIterator.next)
-    pool = multiprocessing.Pool(cores)
-    yield pool.imap
-    pool.terminate()
 
 class S3Swapper(Plugin):
   def activate(self):
