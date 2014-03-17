@@ -39,7 +39,7 @@ def transfer_part(mp_id, mp_keyname, mp_bucketname, i, part):
   """Transfer a part of a multipart upload. Designed to be run in parallel.
   """
   mp = mp_from_ids(mp_id, mp_keyname, mp_bucketname)
-  log.info("Transferring", i, part)
+  log.info("Transferring %s - %s", i, part)
   with open(part) as t_handle:
     mp.upload_part_from_file(t_handle, i+1)
   os.remove(part)
