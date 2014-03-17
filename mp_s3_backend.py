@@ -10,6 +10,7 @@ import contextlib
 import functools
 import multiprocessing
 import logging
+import boto
 from multiprocessing.pool import IMapIterator
 from optparse import OptionParser
 import rfc822
