@@ -47,14 +47,14 @@ class MP_S3Backend(S3Backend):
 
   @map_wrap
   def transfer_part(mp_id, mp_keyname, mp_bucketname, i, part):
-      mp = mp_from_ids(mp_id, mp_keyname, mp_bucketname)
-      print " Transferring", i, part
-      with open(part) as t_handle:
-          mp.upload_part_from_file(t_handle, i+1)
-      os.remove(part)
+    mp = mp_from_ids(mp_id, mp_keyname, mp_bucketname)
+    print " Transferring", i, part
+    with open(part) as t_handle:
+      mp.upload_part_from_file(t_handle, i+1)
+    os.remove(part)
 
 class S3Swapper(Plugin):
-  def activate(self)
+  def activate(self):
     global S3Backend
     self.log.info('Replacing S3Backend with MP_S3Backend')
     S3Backend = MP_S3Backend
