@@ -13,7 +13,7 @@ from optparse import OptionParser
 import rfc822
 
 
-class MP_S3Backend(S3Backend):
+class MP_S3Backend(bakthat.backends.S3Backend):
   def upload(self, s3_keyname, transfer_file, **kwargs):
     self.log.info("Beginning monkey-patched upload!")
     use_rr = kwargs.get("s3_reduced_redundancy", False)
@@ -119,6 +119,5 @@ class MP_S3Backend(S3Backend):
 
 class S3Swapper(Plugin):
   def activate(self):
-    global S3Backend
     self.log.info('Replacing S3Backend with MP_S3Backend')
     bakthat.backends.S3Backend = MP_S3Backend
