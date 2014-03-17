@@ -1,8 +1,8 @@
 from bakthat.plugin import Plugin
 from bakthat.backends import S3Backend
 
-class MP_S3Backend(S3Backend)
-  def upload(self, keyname, filename, **kwargs)
+class MP_S3Backend(S3Backend):
+  def upload(self, keyname, filename, **kwargs):
     k = Key(self.bucket)
     upload_kwargs = {"reduced_redundancy": kwargs.get("s3_reduced_redundancy", False)}
     if kwargs.get("cb", True):
@@ -54,7 +54,7 @@ class MP_S3Backend(S3Backend)
       os.remove(part)
 
 
-class S3Swapper(Plugin)
+class S3Swapper(Plugin):
   def activate(self)
     global S3Backend
     self.log.info('Replacing S3Backend with MP_S3Backend')
