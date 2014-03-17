@@ -21,7 +21,7 @@ def map_wrap(f):
     return apply(f, *args, **kwargs)
   return wrapper
 
-class MP_S3Backend(boto.backend.S3Backend):
+class MP_S3Backend(bakthat.backend.S3Backend):
   def __init__(self, conf={}, profile="default"):
     S3Backend.__init__(self, conf, profile)
     self.conn = boto.connect_s3(self.conf["access_key"], self.conf["secret_key"])
