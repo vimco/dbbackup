@@ -120,5 +120,6 @@ class MP_S3Backend(S3Backend):
 
 class S3Swapper(Plugin):
   def activate(self):
+    global S3Backend
     bakthat.STORAGE_BACKEND = dict(s3=MP_S3Backend)
     self.log.info('Replaced S3Backend with MP_S3Backend')
