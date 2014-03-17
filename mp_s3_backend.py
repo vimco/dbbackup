@@ -10,9 +10,9 @@ class MP_S3Backend(S3Backend):
     mp = self.bucket.initiate_multipart_upload(keyname, **upload_kwargs)
     with multimap(cores) as pmap:
       for _ in pmap(transfer_part, ((mp.id, mp.key_name, mp.bucket_name, i, part)
-                                    for (i, part) in
-                                    enumerate(split_file(filename, mb_size, cores)))):
-          pass
+                                    for (i, part) in
+                                    enumerate(split_file(filename, mb_size, cores)))):
+        pass
     mp.complete_upload()
 
   def split_file(in_file, mb_size, split_num=5):
@@ -26,24 +26,24 @@ class MP_S3Backend(S3Backend):
 
   @contextlib.contextmanager
   def multimap(cores=None):
-      if cores is None:
-          cores = max(multiprocessing.cpu_count() - 1, 1)
-      def wrapper(func):
-          def wrap(self, timeout=None):
-              return func(self, timeout=timeout if timeout is not None else 1e100)
-          return wrap
-      IMapIterator.next = wrapper(IMapIterator.next)
-      pool = multiprocessing.Pool(cores)
-      yield pool.imap
-      pool.terminate()
+    if cores is None:
+      cores = max(multiprocessing.cpu_count() - 1, 1)
+    def wrapper(func):
+      def wrap(self, timeout=None):
+        return func(self, timeout=timeout if timeout is not None else 1e100)
+      return wrap
+    IMapIterator.next = wrapper(IMapIterator.next)
+    pool = multiprocessing.Pool(cores)
+    yield pool.imap
+    pool.terminate()
 
   def mp_from_ids(mp_id, mp_keyname, mp_bucketname):
-      conn = boto.connect_s3()
-      bucket = conn.lookup(mp_bucketname)
-      mp = boto.s3.multipart.MultiPartUpload(bucket)
-      mp.key_name = mp_keyname
-      mp.id = mp_id
-      return mp
+    conn = boto.connect_s3()
+    bucket = conn.lookup(mp_bucketname)
+    mp = boto.s3.multipart.MultiPartUpload(bucket)
+    mp.key_name = mp_keyname
+    mp.id = mp_id
+    return mp
 
   @map_wrap
   def transfer_part(mp_id, mp_keyname, mp_bucketname, i, part):
@@ -53,10 +53,8 @@ class MP_S3Backend(S3Backend):
           mp.upload_part_from_file(t_handle, i+1)
       os.remove(part)
 
-
 class S3Swapper(Plugin):
   def activate(self)
     global S3Backend
     self.log.info('Replacing S3Backend with MP_S3Backend')
     S3Backend = MP_S3Backend
-
