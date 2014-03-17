@@ -14,6 +14,7 @@ import boto
 from multiprocessing.pool import IMapIterator
 import rfc822
 
+log = logging.getLogger(__name__)
 
 def map_wrap(f):
   @functools.wraps(f)
@@ -112,4 +113,4 @@ class MP_S3Backend(S3Backend):
 class S3Swapper(Plugin):
   def activate(self):
     bakthat.STORAGE_BACKEND = dict(s3=MP_S3Backend)
-    self.log.info('Replaced S3Backend with MP_S3Backend')
+    log.info('Replaced S3Backend with MP_S3Backend')
