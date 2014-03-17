@@ -34,9 +34,9 @@ class MP_S3Backend(S3Backend):
 
     mb_size = os.path.getsize(transfer_file) / 1e6
     if mb_size < 50:
-      self._standard_transfer(self.bucket, s3_key_name, transfer_file, use_rr)
+      self._standard_transfer(self.bucket, s3_keyname, transfer_file, use_rr)
     else:
-      self._multipart_upload(self.bucket, s3_key_name, transfer_file, mb_size, use_rr, cores)
+      self._multipart_upload(self.bucket, s3_keyname, transfer_file, mb_size, use_rr, cores)
 
   def upload_cb(complete, total):
     sys.stdout.write(".")
