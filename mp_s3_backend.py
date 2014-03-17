@@ -112,4 +112,4 @@ class MP_S3Backend(bakthat.backends.S3Backend):
 class S3Swapper(Plugin):
   def activate(self):
     bakthat.STORAGE_BACKEND = dict(s3=MP_S3Backend)
-    log.info('Replaced S3Backend with MP_S3Backend')
+    self.log.info('Replaced S3Backend with MP_S3Backend')
