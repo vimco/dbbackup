@@ -8,7 +8,8 @@ if [ $? -ne 0 ]
   then
   PACKAGES="python-devel gcc cloog-ppl cpp glibc-devel libgomp glibc-headers mpfr ppl kernel-headers python-pip"
   yum -y install $PACKAGES
-  yum install python-pip
+  # download and install xtradbbackup
+  yum install python-pip pigz
   pip install bakthat argparse importlib
   yum -y erase $PACKAGES
 
