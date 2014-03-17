@@ -57,7 +57,7 @@ full)
     find_last_full
     innobackupex --use-memory=1G --apply-log $LAST_FULL
     OUTFILE=$BACKUP_DIR/full/full.`basename $LAST_FULL`.tar.gz
-    tar c $LAST_FULL | gzip -1 > $OUTFILE
+    tar c $LAST_FULL | pigz -1 -c - > $OUTFILE
     bakthat backup --prompt=no $OUTFILE
     rm -f $OUTFILE
     rotate_full
