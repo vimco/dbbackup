@@ -40,13 +40,13 @@ test_complete_ok()
 
 rotate_full()
 {
-    find -maxdepth 1 -type d -ctime +14 $FULL_DIR -exec rm -rf {} \;
+    find $FULL_DIR -maxdepth 1 -type d -ctime +14 $FULL_DIR -exec rm -rf {} \;
 }
 
 rotate_incr()
 {
     find_last_full
-    find -maxdepth 1 -type d -older $LAST_FULL -exec rm -rf {} \;
+    find $INCR_DIR -maxdepth 1 -type d -older $LAST_FULL -exec rm -rf {} \;
 }
 
 case $1 in
