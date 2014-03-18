@@ -73,6 +73,9 @@ class MP_S3Backend(S3Backend):
     use_rr = kwargs.get("s3_reduced_redundancy", False)
     cores = 4
 
+    if self.conf["s3_prefix"]:
+      s3_keyname = "%s/%s" % (self.conf["s3_prefix"], s3_keyname)
+
     mb_size = os.path.getsize(transfer_file) / 1e6
     if mb_size < 50:
       self._standard_transfer(self.bucket, s3_keyname, transfer_file, use_rr)
