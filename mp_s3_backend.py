@@ -125,7 +125,7 @@ class MP_S3Backend(S3Backend):
     return encrypted_out
 
   def keyname(self, s3_keyname):
-    if self.conf["s3_prefix"]
+    if self.conf["s3_prefix"]:
       return "%s/%s" % (self.conf["s3_prefix"], s3_keyname)
     return s3_keyname
 
