@@ -11,6 +11,7 @@ import functools
 import multiprocessing
 import logging
 import boto
+from boto.s3.key import Key
 from multiprocessing.pool import IMapIterator
 import rfc822
 
