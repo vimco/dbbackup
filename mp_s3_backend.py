@@ -20,7 +20,7 @@ def map_wrap(f):
   @functools.wraps(f)
   def wrapper(*args, **kwargs):
     return apply(f, *args, **kwargs)
-  return wrapper
+    return wrapper
 
 def mp_from_ids(mp_id, mp_keyname, mp_bucketname):
   """Get the multipart upload from the bucket and multipart IDs.
@@ -73,8 +73,7 @@ class MP_S3Backend(S3Backend):
     use_rr = kwargs.get("s3_reduced_redundancy", False)
     cores = 4
 
-    if self.conf["s3_prefix"]:
-      s3_keyname = "%s/%s" % (self.conf["s3_prefix"], s3_keyname)
+    s3_keyname = self.keyname(s3_keyname)
 
     mb_size = os.path.getsize(transfer_file) / 1e6
     if mb_size < 50:
@@ -114,6 +113,27 @@ class MP_S3Backend(S3Backend):
                                           enumerate(split_file(tarball, mb_size, cores)))):
             pass
     mp.complete_upload()
+
+  def download(self, keyname):
+    k = Key(self.bucket)
+    k.key = self.keyname(keyname)
+
+    encrypted_out = tempfile.TemporaryFile()
+    k.get_contents_to_file(encrypted_out)
+    encrypted_out.seek(0)
+
+    return encrypted_out
+
+  def keyname(self, s3_keyname):
+    if self.conf["s3_prefix"]
+      return "%s/%s" % (self.conf["s3_prefix"], s3_keyname)
+    return s3_keyname
+
+  def delete(self, keyname):
+    k = Key(self.bucket)
+    k.key = self.keyname(keyname)
+    self.bucket.delete_key(k)
+
 
 class S3Swapper(Plugin):
   def activate(self):
