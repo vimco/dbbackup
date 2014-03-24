@@ -8,9 +8,9 @@ if [ $? -ne 0 ]
   then
   pushd /tmp
   wget http://mirror-fpt-telecom.fpt.net/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
-  rpm -ivh epel-release-6-8.noarch.rpm
+  rpm -Uvh epel-release-6-8.noarch.rpm
   wget http://www.percona.com/redir/downloads/XtraBackup/LATEST/RPM/rhel6/x86_64/percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
-  rpm -ivh percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
+  rpm -Uvh percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
   popd
   PACKAGES="python-devel gcc cloog-ppl cpp glibc-devel libgomp glibc-headers mpfr ppl kernel-headers python-pip"
   yum -y install $PACKAGES
