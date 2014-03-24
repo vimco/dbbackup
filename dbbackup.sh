@@ -46,7 +46,7 @@ rotate_full()
 rotate_incr()
 {
     find_last_full
-    find $INCR_DIR -maxdepth 1 -type d -older $LAST_FULL -exec rm -rf {} \;
+    find $INCR_DIR -maxdepth 1 -type d ! -newer $LAST_FULL -exec rm -rf {} \;
 }
 
 case $1 in
