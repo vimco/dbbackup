@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 # Find either latest restore target or requested target
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
     echo "Usage : $0 [full|incremental] <target>"
     exit
 fi
@@ -9,12 +9,12 @@ fi
 type=$1
 target=$2
 
-if [ "$target" -eq ""]; then
+if [ "$target" == "" ]; then
   target=`bakthat show | head -1`
 fi
 
 is_local_target=`echo $target | grep '^/'`
-if [ "is_local_target" -ne "" ];
+if [ "is_local_target" != "" ]; then
   is_local_target=1
 else
   is_local_target=0
@@ -23,26 +23,24 @@ fi
 should_continue() {
   text=$1
   answer="n"
-  echo "$text. Is this ok? <y|N> "
+  printf "$text. Is this ok? <y|N> "
   read answer
 
-  if [ "$answer" -eq "y" || "$answer" -eq "Y" ]; then
+  if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
     return
-  elif [ "answer" -eq "n" || "$answer" -eq "N"]; then
-    echo "Ok - Exiting!"
+  elif [ "$answer" = "n" ] || [ "$answer" = "N" ] || [ "$answer" = "" ]; then
+    echo "Exiting."
+    exit
   else
-    should_continue()
+    should_continue "$text"
   fi
 }
-
-should_continue("About to perform $type restore using $target")
-perform_restore()
 
 perform_restore() {
   export TMP=/dbbackup/restore
   mkdir -p $TMP
 
-  if [ $is_local_target == 0 ]; then
+  if [ $is_local_target -eq 0 ]; then
     echo "Restoring backup from remote location to local"
     bakthat restore $target
     extract_dir=$TMP/`basename $target .tgz`
@@ -50,12 +48,12 @@ perform_restore() {
     target=$extract_dir
   fi
 
+  should_continue 'In order to continue restoration, the existing mysql data directory must be clean.  Next step is to run `rm -rf /mysql/data`'
+  `rm -rf /mysql/data/*`
+
   case $type in
     full)
-      should_continue("In order to continue restoration, the existing mysql data directory must be clean.  Next step is to run `rm -rf /mysql/data`")
-      `rm -rf /mysql/data/*`
-
-      should_continue("About to restore data to target")
+      should_continue "About to restore data to target"
       innobackupex --apply-log $target
       innobackupex --copy-back $target
 
@@ -73,3 +71,6 @@ perform_restore() {
       ;;
   esac
 }
+
+should_continue "About to perform $type restore using $target"
+perform_restore
