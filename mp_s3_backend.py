@@ -24,7 +24,7 @@ def map_wrap(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         return apply(f, *args, **kwargs)
-        return wrapper
+    return wrapper
 
 
 def mp_from_ids(mp_id, mp_keyname, mp_bucketname):
@@ -126,8 +126,8 @@ class MP_S3Backend(S3Backend):
         with multimap(cores) as pmap:
             for _ in pmap(transfer_part,
                           ((mp.id, mp.key_name, mp.bucket_name, i, part)
-                          for (i, part) in enumerate(
-                              split_file(tarball, mb_size, cores)))):
+                          for (i, part) in
+                          enumerate(split_file(tarball, mb_size, cores)))):
                 pass
         mp.complete_upload()
 
