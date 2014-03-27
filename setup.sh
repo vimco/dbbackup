@@ -3,15 +3,8 @@
 USER_HOME=/home/dbbackup
 
 which bakthat > /dev/null 2>&1
-
 if [ $? -ne 0 ]
   then
-  pushd /tmp
-  wget http://mirror-fpt-telecom.fpt.net/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
-  rpm -Uvh epel-release-6-8.noarch.rpm
-  wget http://www.percona.com/redir/downloads/XtraBackup/LATEST/RPM/rhel6/x86_64/percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
-  rpm -Uvh percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
-  popd
   PACKAGES="python-devel gcc cloog-ppl cpp glibc-devel libgomp glibc-headers mpfr ppl kernel-headers python-pip"
   yum -y install $PACKAGES
   # download and install xtradbbackup
@@ -20,6 +13,17 @@ if [ $? -ne 0 ]
   yum -y erase $PACKAGES
 
   getent passwd dbbackup >/dev/null || useradd dbbackup
+fi
+
+which innobackupex > /dev/null 2>&1
+if [ $? -ne 0 ]
+  then
+  pushd /tmp
+  wget http://mirror-fpt-telecom.fpt.net/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
+  rpm -Uvh epel-release-6-8.noarch.rpm
+  wget http://www.percona.com/redir/downloads/XtraBackup/LATEST/RPM/rhel6/x86_64/percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
+  rpm -Uvh percona-xtrabackup-2.1.8-733.rhel6.x86_64.rpm
+  popd
 fi
 
 if [ ! -f $USER_HOME/.bakthat.yml ]
