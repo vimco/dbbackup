@@ -40,7 +40,7 @@ test_complete_ok()
 
 rotate_full()
 {
-    find $FULL_DIR -maxdepth 1 -type d -ctime +3 -exec rm -rf {} \;
+    find $FULL_DIR -maxdepth 1 -type d -mtime +1 -exec rm -rf {} \;
 }
 
 rotate_incr()
