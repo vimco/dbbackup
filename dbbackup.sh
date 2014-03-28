@@ -52,7 +52,7 @@ rotate_incr()
 case $1 in
 full)
     logfile=$BACKUP_DIR/`date +%Y%m%d%H%M%s`-full_backup.log
-    innobackupex --user=$BACKUP_USER $FULL_DIR 2>&1 | tee $logfile
+    innobackupex --user=$BACKUP_USER --safe-slave-backup --slave-info $FULL_DIR 2>&1 | tee $logfile
     test_complete_ok $logfile
     find_last_full
     innobackupex --use-memory=1G --apply-log --redo-only $LAST_FULL
