@@ -67,9 +67,8 @@ fi
 
 if [ ! -f $USER_HOME/.bakthat.yml ]
   then
-  sudo -H -u dbbackup bakthat configure
-  sudo -H -u dbbackup bakthat configure_backups_rotation
-
+  sudo -H -u dbbackup bakthat configure &&
+  sudo -H -u dbbackup bakthat configure_backups_rotation &&
   cat <<EOL >> $USER_HOME/.bakthat.yml
   plugins_dir: $USER_HOME/.bakthat_plugins/
   plugins: [mp_s3_backend.S3Swapper]
