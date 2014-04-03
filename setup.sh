@@ -19,8 +19,13 @@ install_bakthat() {
     apt-get -y remove $PACKAGES
   else
     PACKAGES="python-devel gcc cloog-ppl cpp glibc-devel libgomp glibc-headers mpfr ppl kernel-headers python-pip"
+    pushd /tmp
+    wget http://mirror-fpt-telecom.fpt.net/fedora/epel/6/i386/epel-release-6-8.noarch.rpm
+    yum install -y epel-release-6-8.noarch.rpm
+    yum update
     yum -y install $PACKAGES pigz
     # download and install xtradbbackup
+    popd
     pip install bakthat argparse importlib
     yum -y erase $PACKAGES
   fi
@@ -62,8 +67,8 @@ fi
 
 if [ ! -f $USER_HOME/.bakthat.yml ]
   then
-  sudo -u dbbackup bakthat configure
-  sudo -u dbbackup bakthat configure_backups_rotation
+  sudo -H -u dbbackup bakthat configure
+  sudo -H -u dbbackup bakthat configure_backups_rotation
 
   cat <<EOL >> $USER_HOME/.bakthat.yml
   plugins_dir: $USER_HOME/.bakthat_plugins/
